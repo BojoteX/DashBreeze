@@ -385,8 +385,10 @@ namespace Bojote.DashBreeze
             if (!SerialConnection.IsConnected)
                 return;
 
+            byte FanSpeed = (byte)Plugin.Settings.FanSpeed;
+
             // Convert to byte
-            byte[] serialData = new byte[] { 0, (byte)Plugin.Settings.FanSpeed };
+            byte[] serialData = new byte[] { FanSpeed, FanSpeed };
 
             // SimHub.Logging.Current.Info("I'm about to send the command via SerialCommand: " + command);
             SerialConnection.SerialPort.Write(serialData, 0, serialData.Length);
