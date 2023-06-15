@@ -88,34 +88,13 @@
                         </ToggleButton>
                     </StackPanel>
                     
-                    <StackPanel Margin="0,30,0,10">
-                        <styles:SHSectionTitle x:Name="Title" HorizontalAlignment="Left">Advanced Settings</styles:SHSectionTitle>
-                    </StackPanel>
 
-                    <CheckBox x:Name="MaxTest" Content="Test Max Tension" Margin="0,5,0,5"
-                          IsChecked="{Binding MaxTest}"
-                          Checked="CheckBox_Checked"
-                          Unchecked="CheckBox_Unchecked" />
-
-                    <CheckBox x:Name="SwayReversed" Content="Sway Reversed" Margin="0,0,0,5"
-                          IsChecked="{Binding SwayReversed}"
-                          Checked="CheckBox_Checked"
-                          Unchecked="CheckBox_Unchecked" />
-
-                    <CheckBox x:Name="DecelReversed" Content="Surge Reversed" Margin="0,0,0,10"
-                          IsChecked="{Binding DecelReversed}"
-                          Checked="CheckBox_Checked"
-                          Unchecked="CheckBox_Unchecked" />
 
                     <StackPanel Margin="0,10">
-                        <styles:SHButtonPrimary x:Name="AutodetectButton" HorizontalAlignment="Left" Click="Button_Click">Autodetect Device</styles:SHButtonPrimary>
+                        <styles:SHButtonPrimary Width="210" x:Name="AutodetectButton" HorizontalAlignment="Left" Click="Button_Click">Autodetect Device</styles:SHButtonPrimary>
                     </StackPanel>
 
-                    <StackPanel Margin="0,10">
-                        <TextBlock Width="200" Height="170" TextWrapping="Wrap" TextAlignment="Justify">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing  sum dolor sit amet, consectetur adipiscing  elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.d est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing  elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.d est laborum.
-                        </TextBlock>
-                    </StackPanel>
+
 
                 <!--
 
@@ -138,62 +117,22 @@
                 <StackPanel Grid.Column="1" Margin="30,0,0,10">
 
                     <StackPanel Margin="0,0,0,10">
-                        <styles:SHSectionTitle x:Name="Section2" HorizontalAlignment="Left">Servo Control</styles:SHSectionTitle>
+                        <styles:SHSectionTitle x:Name="Section2" HorizontalAlignment="Left">Fan Control</styles:SHSectionTitle>
                     </StackPanel>
 
                     <StackPanel Margin="0,10">
-                        <Label Content="Left Motor Offset" />
+                        <Label Content="Fan Speed" />
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Slider x:Name="LeftOffset" Minimum="0" Maximum="179" TickFrequency="1" Width="150" Value="{Binding LeftOffset}" ValueChanged="Slider_ValueChanged" />
-                            <Custom:NumericUpDown Minimum="0" Maximum="179" Value="{Binding LeftOffset}" Margin="10,0,0,0" Width="80" />
+                            <Slider x:Name="FanSpeed" Minimum="0" Maximum="100" TickFrequency="1" Width="150" Value="{Binding FanSpeed}" ValueChanged="Slider_ValueChanged" />
+                            <Custom:NumericUpDown Minimum="0" Maximum="100" Value="{Binding FanSpeed}" Margin="10,0,0,0" Width="80" />
                         </StackPanel>
                     </StackPanel>
 
                     <StackPanel Margin="0,10">
-                        <Label Content="Right Motor Offset" />
+                        <Label Content="Fan Intensity" />
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Slider x:Name="RightOffset" Minimum="0" Maximum="179" TickFrequency="1" Width="150" Value="{Binding RightOffset}" ValueChanged="Slider_ValueChanged" />
-                            <Custom:NumericUpDown Minimum="0" Maximum="179" Value="{Binding RightOffset}" Margin="10,0,0,0" Width="80" />
-                        </StackPanel>
-                    </StackPanel>
-
-                    <StackPanel Margin="0,10">
-                        <Label Content="Max Tension" />
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Slider x:Name="Tmax" Minimum="3" Maximum="180" TickFrequency="1" Width="150" Value="{Binding Tmax}" ValueChanged="Slider_ValueChanged" />
-                            <Custom:NumericUpDown Minimum="3" Maximum="180" Value="{Binding Tmax}" Margin="10,0,0,0" Width="80" />
-                        </StackPanel>
-                    </StackPanel>
-
-                    <StackPanel Margin="0,10">
-                        <Label Content="Surge Gain" />
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Slider x:Name="DecelGain" Minimum="0" Maximum="10" TickFrequency="1" Width="150" Value="{Binding DecelGain}" ValueChanged="Slider_ValueChanged" />
-                            <Custom:NumericUpDown Minimum="0" Maximum="10" Value="{Binding DecelGain}" Margin="10,0,0,0" Width="80" />
-                        </StackPanel>
-                    </StackPanel>
-
-                    <StackPanel Margin="0,10">
-                        <Label Content="Sway Gain" />
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Slider x:Name="YawGain" Minimum="0" Maximum="10" TickFrequency="1" Width="150" Value="{Binding YawGain}" ValueChanged="Slider_ValueChanged" />
-                            <Custom:NumericUpDown Minimum="0" Maximum="10" Value="{Binding YawGain}" Margin="10,0,0,0" Width="80" />
-                        </StackPanel>
-                    </StackPanel>
-
-                    <StackPanel Margin="0,10">
-                        <Label Content="Smooth" />
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Slider x:Name="Smooth" Minimum="0" Maximum="10" TickFrequency="1" Width="150" Value="{Binding Smooth}" ValueChanged="Slider_ValueChanged" />
-                            <Custom:NumericUpDown Minimum="0" Maximum="10" Value="{Binding Smooth}" Margin="10,0,0,0" Width="80" />
-                        </StackPanel>
-                    </StackPanel>
-
-                    <StackPanel Margin="0,10">
-                        <Label Content="Servo Deadzone" />
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Slider x:Name="Deadzone" Minimum="0" Maximum="10" TickFrequency="1" Width="150" Value="{Binding Deadzone}" ValueChanged="Slider_ValueChanged" />
-                            <Custom:NumericUpDown Minimum="0" Maximum="10" Value="{Binding Deadzone}" Margin="10,0,0,0" Width="80" />
+                            <Slider x:Name="FanIntensity" Minimum="10" Maximum="100" TickFrequency="1" Width="150" Value="{Binding FanIntensity}" ValueChanged="Slider_ValueChanged" />
+                            <Custom:NumericUpDown Minimum="10" Maximum="100" Value="{Binding FanIntensity}" Margin="10,0,0,0" Width="80" />
                         </StackPanel>
                     </StackPanel>
 
@@ -207,7 +146,7 @@
 
                     <StackPanel Margin="0,0,0,10">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
-                            <TextBox x:Name="DebugOutputTextBox" Text="{Binding DebugOutput}" Width="250" Height="500" IsReadOnly="True" Grid.Column="2"/>
+                            <TextBox x:Name="DebugOutputTextBox" Text="{Binding DebugOutput}" Width="250" Height="160" IsReadOnly="True" Grid.Column="2"/>
                         </ScrollViewer>
                     </StackPanel>
 

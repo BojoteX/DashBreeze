@@ -26,10 +26,6 @@ namespace Bojote.DashBreeze
         // Declared for gameData
         public static bool SerialOK = false;
 
-        // Low Pass Filter variables for servo operation
-        double prevDecel = 0;
-        double prevSway = 0;
-
         public MainSettings Settings;
 
         /// <summary>
@@ -65,70 +61,7 @@ namespace Bojote.DashBreeze
                 {
                     if (SerialOK)
                     {
-                        // Tmax should never be a number over 180;
-                        int tmax = Settings.Tmax;
-
-                        // Reverse the direcction of Surge or Sway if requested (and apply a gain factor)
-                        double decel = Settings.DecelGain * (data.NewData.AccelerationSurge ?? 0) * (Settings.DecelReversed ? -1 : 1);
-                        double sway = Settings.YawGain * (data.NewData.AccelerationSway ?? 0) * (Settings.SwayReversed ? -1 : 1);
-
-                        // Adjust the filter strength from 0 (no filtering) to 10 (heavy filtering)
-                        int filterStrength = Settings.Smooth;
-                        double alpha = 2.0 / (filterStrength + 1.0);
-
-                        // Apply the low-pass filter
-                        double decelFiltered = prevDecel + alpha * (decel - prevDecel);
-                        double swayFiltered = prevSway + alpha * (sway - prevSway);
-
-                        prevDecel = decelFiltered;
-                        prevSway = swayFiltered;
-
-                        // Calculating the hypotenuse of the surge and sway forces
-                        double decelSquared = decelFiltered * decelFiltered;
-                        double swaySquared = swayFiltered * swayFiltered;
-                        double decelDoubled = decelFiltered * 2;
-
-                        // Compute l and r
-                        double r = Math.Sqrt(decelSquared + swaySquared);
-                        double l = decelDoubled - r;
-
-                        // Apply deadzone to the servo positions
-                        double deadzoneRange = Settings.Deadzone; // Adjust this value based on your desired deadzone range
-                        double deadzoneCenter = 0.0; // Adjust this value if you want the deadzone centered around a different position
-
-                        // Apply deadzone to the left servo position
-                        if (Math.Abs(l) <= deadzoneCenter + deadzoneRange / 2.0)
-                        {
-                            l = deadzoneCenter;
-                        }
-
-                        // Apply deadzone to the right servo position
-                        if (Math.Abs(r) <= deadzoneCenter + deadzoneRange / 2.0)
-                        {
-                            r = deadzoneCenter;
-                        }
-
-                        // Swap if necessary (be careful + or - values have an effect on which servo is being affected)
-                        if (swayFiltered < 0)
-                        {
-                            (r, l) = (l, r);
-                        }
-
-                        // Clipping so that l and r are never > tmax or less than the numbers 2 or 3
-                        l = Math.Max(Math.Min(l, tmax), 2);
-                        r = Math.Max(Math.Min(r, tmax), 3);
-
-                        // For future use. Trigger an event if both l and r are at tmax
-                        if (l == tmax && r == tmax)
-                        {
-                            this.TriggerEvent("MaxTension");
-                        }
-
-                        byte leftServoAngle = (byte)Math.Round(l);
-                        byte rightServoAngle = (byte)Math.Round(r);
-
-                        byte[] serialData = new byte[] { leftServoAngle, rightServoAngle };
-                        SerialConnection.SerialPort.Write(serialData, 0, 2);
+                        // this.TriggerEvent("MaxSpeed");
                     }
                 }
             }
@@ -188,7 +121,7 @@ namespace Bojote.DashBreeze
             this.AttachDelegate("CurrentDateTime", () => DateTime.Now);
 
             // Declare an action which can be called
-            this.AddAction("ToggleLiveBelt", (a, b) =>
+            this.AddAction("ToggleLiveFan", (a, b) =>
             {
                 if (SerialOK)
                     SerialOK = false;
@@ -197,18 +130,18 @@ namespace Bojote.DashBreeze
             });
 
             // Declare an event
-            this.AddEvent("MaxTension");
+            this.AddEvent("MaxSpeed");
 
             // Declare an action which can be called
-            this.AddAction("IncrementMaxTension",(a, b) =>
+            this.AddAction("IncrementFanSpeed",(a, b) =>
             {
-            Settings.Tmax++;
+            Settings.FanSpeed++;
             });
 
             // Declare an action which can be called
-            this.AddAction("DecrementMaxTension", (a, b) =>
+            this.AddAction("DecrementFanSpeed", (a, b) =>
             {
-                Settings.Tmax--;
+                Settings.FanSpeed--;
             });
 
             SimHub.Logging.Current.Info("END -> Init");
@@ -223,16 +156,8 @@ namespace Bojote.DashBreeze
                 SelectedSerialDevice = "None",
                 ConnectToSerialDevice = false,
                 SelectedBaudRate = "115200",
-                Deadzone = 5,
-                LeftOffset = 15,
-                RightOffset = 15,
-                Tmax = 180,
-                DecelGain = 5,
-                YawGain = 5,
-                Smooth = 10,
-                MaxTest = false,
-                SwayReversed = false,
-                DecelReversed = false
+                FanSpeed = 10,
+                FanIntensity = 15
             };
             return settings;
         }

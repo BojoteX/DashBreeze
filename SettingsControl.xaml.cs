@@ -354,54 +354,22 @@ namespace Bojote.DashBreeze
         {
             // Disconnect from the selected serial device.
             Plugin.Settings.ConnectToSerialDevice = false;
-            MaxTest.IsChecked = false;
             await SerialConnection.Disconnect(withoutDelay: true);
         }
 
         // Event handler for ConnectCheckBox checked
         private void CheckBox_Checked(object sender, EventArgs e)
         {
-            if (sender == MaxTest)
-            {
-                if (ConnectCheckBox.IsChecked == false)
-                {
-                    string _data = "You need to be connected first!";
-                    OutputMsg(_data);
-                    MaxTest.IsChecked = false;
-                    return;
-                }
-
-                LeftOffset.IsEnabled = false;
-                RightOffset.IsEnabled = false;
-                DecelGain.IsEnabled = false;
-                YawGain.IsEnabled = false;
-                Smooth.IsEnabled = false;
-                Deadzone.IsEnabled = false;
-
-                SerialCommand(sender);
-            }
         }
 
         // Event handler for ConnectCheckBox unchecked
         private void CheckBox_Unchecked(object sender, EventArgs e)
         {
-            // Update settings based on the data that was changed
-            if (sender == MaxTest)
-            {
-                LeftOffset.IsEnabled = true;
-                RightOffset.IsEnabled = true;
-                DecelGain.IsEnabled = true;
-                YawGain.IsEnabled = true;
-                Smooth.IsEnabled = true;
-                Deadzone.IsEnabled = true;
-
-                SerialCommand(sender);
-            }
         }
 
         private void Slider_ValueChanged(object sender, EventArgs e)
         {
-            if (sender == LeftOffset || sender == RightOffset || sender == Tmax)
+            if (sender == FanSpeed)
             {
                 // Here's the actual command to send to my device
                 SerialCommand(sender);
@@ -417,36 +385,12 @@ namespace Bojote.DashBreeze
             if (!SerialConnection.IsConnected)
                 return;
 
-            // Doing things right now!
-            byte _0 = 0;
-            byte _L = (byte)Plugin.Settings.LeftOffset;
-            byte _1 = 1;
-            byte _R = (byte)Plugin.Settings.RightOffset;
-            byte _Two = 2;
-            byte _Three = 3;
-            byte _tmax = (byte)Plugin.Settings.Tmax;
-
-            if (Plugin.Settings.MaxTest)
-            {
-                _Two = (byte)((_tmax - 1) - _L);
-                _Three = (byte)(_Two + 1);
-            }
-
-            _Two = Math.Max(Math.Min(_Two, _tmax), (byte)2);
-            _Three = Math.Max(Math.Min(_Three, _tmax), (byte)3);
-
             // Convert to byte
-            byte[] serialData = new byte[] { _0, _L, _1, _R, _Two, _Three };
+            byte[] serialData = new byte[] { 0, (byte)Plugin.Settings.FanSpeed };
 
-            if (!Plugin.Settings.MaxTest && sender == Tmax)
-            {
-                // Just avoid sending serial commands for this scenario.
-            }
-            else
-            {
-                // SimHub.Logging.Current.Info("I'm about to send the command via SerialCommand: " + command);
-                SerialConnection.SerialPort.Write(serialData, 0, serialData.Length);
-            }
+            // SimHub.Logging.Current.Info("I'm about to send the command via SerialCommand: " + command);
+            SerialConnection.SerialPort.Write(serialData, 0, serialData.Length);
+
         }
 
         public async Task<bool> TryConnect(string currentSelection, int BaudRate)
@@ -553,20 +497,8 @@ namespace Bojote.DashBreeze
 
         public void InitServos()
         {
-            // Initialize the servos
-            byte _0 = 0;
-            byte _L = (byte)Plugin.Settings.LeftOffset;
-            byte _1 = 1;
-            byte _R = (byte)Plugin.Settings.RightOffset;
-            byte _Two = 2;
-            byte _Three = 3;
-            byte _tmax = (byte)Plugin.Settings.Tmax;
-
-            _Two = Math.Max(Math.Min(_Two, _tmax), (byte)2);
-            _Three = Math.Max(Math.Min(_Three, _tmax), (byte)3);
-
-            // Convert to byte
-            byte[] serialData = new byte[] { _0, _L, _1, _R, _Two, _Three };
+            // Initialize the Fans to 100% Duty cycle
+            byte[] serialData = new byte[] { 0, 10 };
 
             SerialConnection.SerialPort.Write(serialData, 0, serialData.Length);
         }
