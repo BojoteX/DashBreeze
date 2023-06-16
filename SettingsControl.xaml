@@ -88,14 +88,6 @@
                         </ToggleButton>
                     </StackPanel>
                     
-
-
-                    <StackPanel Margin="0,10">
-                        <styles:SHButtonPrimary Width="210" x:Name="AutodetectButton" HorizontalAlignment="Left" Click="Button_Click">Autodetect Device</styles:SHButtonPrimary>
-                    </StackPanel>
-
-
-
                 <!--
 
                     <StackPanel Margin="0,10">
@@ -116,25 +108,22 @@
                 <!-- Right side sliders -->
                 <StackPanel Grid.Column="1" Margin="30,0,0,10">
 
-                    <StackPanel Margin="0,0,0,10">
-                        <styles:SHSectionTitle x:Name="Section2" HorizontalAlignment="Left">Fan Control</styles:SHSectionTitle>
-                    </StackPanel>
+                <StackPanel Margin="0,0,0,10">
+                    <styles:SHSectionTitle x:Name="Section2" HorizontalAlignment="Left">Fan Control</styles:SHSectionTitle>
+                </StackPanel>
 
-                    <StackPanel Margin="0,10">
-                        <Label Content="Fan Speed" />
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <Slider x:Name="FanSpeed" Minimum="0" Maximum="100" TickFrequency="1" Width="150" Value="{Binding FanSpeed}" ValueChanged="Slider_ValueChanged" />
-                            <Custom:NumericUpDown Minimum="0" Maximum="100" Value="{Binding FanSpeed}" Margin="10,0,0,0" Width="80" />
-                        </StackPanel>
-                    </StackPanel>
-
-                    <StackPanel Margin="0,10">
+                <StackPanel Margin="0,10">
                         <Label Content="Fan Intensity" />
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <Slider x:Name="FanIntensity" Minimum="10" Maximum="100" TickFrequency="1" Width="150" Value="{Binding FanIntensity}" ValueChanged="Slider_ValueChanged" />
                             <Custom:NumericUpDown Minimum="10" Maximum="100" Value="{Binding FanIntensity}" Margin="10,0,0,0" Width="80" />
                         </StackPanel>
+
+                    <StackPanel Margin="0,10">
+                        <styles:SHButtonPrimary Width="210" x:Name="AutodetectButton" HorizontalAlignment="Left" Click="Button_Click">Autodetect Device</styles:SHButtonPrimary>
                     </StackPanel>
+
+                </StackPanel>
 
                 </StackPanel>
 
@@ -146,7 +135,7 @@
 
                     <StackPanel Margin="0,0,0,10">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
-                            <TextBox x:Name="DebugOutputTextBox" Text="{Binding DebugOutput}" Width="250" Height="160" IsReadOnly="True" Grid.Column="2"/>
+                            <TextBox x:Name="DebugOutputTextBox" Text="{Binding DebugOutput}" Width="250" Height="110" IsReadOnly="True" Grid.Column="2"/>
                         </ScrollViewer>
                     </StackPanel>
 

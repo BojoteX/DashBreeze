@@ -86,7 +86,6 @@ namespace Bojote.DashBreeze
             ConnectCheckBox.Checked += Connect_Checked;
             ConnectCheckBox.Unchecked += Connect_Unchecked;
 
-            // Connect automatically if setting is active
             Task.Run(() => TryConnect(null,0));
 
             // Need to figure out a more efficient way to do this and limit it to com ports only..
@@ -241,8 +240,7 @@ namespace Bojote.DashBreeze
             if (SerialConnection != null)
             {
                 // Plugin.Settings.ConnectToSerialDevice = false;
-                SerialConnection.ForcedDisconnect();
-                SimHub.Logging.Current.Info("Changed game, disconnecting serial!");
+
             }
             SimHub.Logging.Current.Info("END -> SettingsControl_UnLoaded");
         }
@@ -369,11 +367,7 @@ namespace Bojote.DashBreeze
 
         private void Slider_ValueChanged(object sender, EventArgs e)
         {
-            if (sender == FanSpeed)
-            {
-                // Here's the actual command to send to my device
-                SerialCommand(sender);
-            }
+
         }
         private void SerialCommand(object sender)
         {
@@ -384,14 +378,6 @@ namespace Bojote.DashBreeze
             // Not connected? don't even run...
             if (!SerialConnection.IsConnected)
                 return;
-
-            byte FanSpeed = (byte)Plugin.Settings.FanSpeed;
-
-            // Convert to byte
-            byte[] serialData = new byte[] { FanSpeed, FanSpeed };
-
-            // SimHub.Logging.Current.Info("I'm about to send the command via SerialCommand: " + command);
-            SerialConnection.SerialPort.Write(serialData, 0, serialData.Length);
 
         }
 
@@ -437,7 +423,7 @@ namespace Bojote.DashBreeze
                         if (SerialConnection.IsConnected)
                         {
                             SimHub.Logging.Current.Info("And it was a success (was already connected)");
-                            SerialConnection.ChangeDeviceStateAsync(Main.Constants.uniqueID);
+                            SerialConnection.ChangeDeviceStateAsync();
                             SimHub.Logging.Current.Info("Our device should be ready to receive data...");
                             isChecked = true;
                             int CurrentbaudRate = SerialConnection.GetBaudRate();
@@ -450,7 +436,7 @@ namespace Bojote.DashBreeze
                             SimHub.Logging.Current.Info("Will try to connect to: " + selectedPort);
                             if(SerialConnection.IsConnected) {
                                 SimHub.Logging.Current.Info("And it was a success (Created a new connection)");
-                                SerialConnection.ChangeDeviceStateAsync(Main.Constants.uniqueID);
+                                SerialConnection.ChangeDeviceStateAsync();
                                 SimHub.Logging.Current.Info("Our device should be ready to receive data...");
                                 isChecked = true;
                                 int CurrentbaudRate = SerialConnection.GetBaudRate();
@@ -500,89 +486,11 @@ namespace Bojote.DashBreeze
         public void InitServos()
         {
             // Initialize the Fans to 100% Duty cycle
-            byte[] serialData = new byte[] { 0, 10 };
+            byte[] serialData = new byte[] { 10, 10 };
 
             SerialConnection.SerialPort.Write(serialData, 0, serialData.Length);
         }
 
-        public async Task ChangeDeviceState(string identifier, string portName)
-        {
-            int BaudRate = int.Parse(BaudRateComboBox.SelectedItem.ToString());
-
-            // If SerialConnection is null, instantiate it.
-            if (SerialConnection == null)
-            {
-                SimHub.Logging.Current.Info("Instantiating SerialConnection for ChangeDeviceState");
-                SerialConnection = new SerialConnection();
-            }
-            else
-            {
-                SimHub.Logging.Current.Info("Using already instantiated SerialConnection while running ChangeDeviceState");
-            }
-
-            SimHub.Logging.Current.Info("About to ask if IsConnected");
-
-            bool use_existing;
-            if (SerialConnection.IsConnected)
-            {
-                use_existing = true;
-                OutputMsg("Using existing connection to " + portName);
-                SimHub.Logging.Current.Info("Using existing connection to " + portName);
-            }
-            else
-            {
-                use_existing = false;
-                try
-                {
-                    await SerialConnection.Connect(portName, BaudRate, ResetCon: false);
-
-                    if (!SerialConnection.IsConnected)
-                        return;
-
-
-                    OutputMsg("Just opened a new connection to " + portName);
-                    SimHub.Logging.Current.Info("Just opened a new connection to " + portName);
-                    SimHub.Logging.Current.Info("Waited for 2 seconds...");
-                    OutputMsg("Waited 2 seconds, lets send commands");
-                }
-                catch (UnauthorizedAccessException ex)
-                {
-                    SimHub.Logging.Current.Error($"Access to the port '{portName}' is denied. " + ex.Message);
-                    OutputMsg($"Access to the port '{portName}' is denied. " + ex.Message);
-                }
-                catch (Exception)
-                {
-                    SimHub.Logging.Current.Error($"Could not connect to {portName}");
-                    OutputMsg($"Could not connect to {portName}");
-                }
-                finally
-                {
-                    // SimHub.Logging.Current.Error($"Something happened!");
-                    // OutputMsg($"Something happened!");
-                }
-            }
-
-            if (SerialConnection.SerialPort == null)
-                return;
-
-            // Handle it here
-            byte[] command;
-            if (identifier == Main.Constants.QueryStatus) // If Only query set Byte 254
-                command = new byte[] { 254 };
-            else
-                command = new byte[] { 255 };
-
-            SimHub.Logging.Current.Info($"Command {command[0]} sent with {identifier}!");
-            OutputMsg(($"Command {command[0]} sent with {identifier}!"));
-
-            // Send the action Command
-            SerialConnection.SerialPort.Write(command, 0, 1);
-            SerialConnection.SerialPort.WriteLine(identifier);
-
-            // Wait a bit before disconnecting... an only disconnect IF we created a new connection
-            if(use_existing == false)
-                await SerialConnection.Disconnect();
-        }
         public void HandleDataReceived(string data)
         {
             SimHub.Logging.Current.Info($"Received: {data.Trim()}");

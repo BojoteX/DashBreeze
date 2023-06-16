@@ -41,14 +41,12 @@ namespace Bojote.DashBreeze
 
                             SimHub.Logging.Current.Info($"Opened {portName}");
 
-                            string SendString = Main.Constants.HandShakeSnd;
                             string HandShakeString = Main.Constants.HandShakeRcv;
 
-                            byte[] command255 = { 255 };
-                            SC.SerialPort.Write(command255, 0, 1);
-                            SC.SerialPort.WriteLine(SendString);
+                            byte[] command255 = { 255, 254 };
+                            SC.SerialPort.Write(command255, 0, command255.Length);
 
-                            SimHub.Logging.Current.Info($"Sent the string {SendString} preceded by the Byte 255");
+                            SimHub.Logging.Current.Info($"Sent the Byte codes 255, 254, we should get {HandShakeString} if device is present");
 
                             StringBuilder response = new StringBuilder();
                             byte[] buffer = new byte[1024];

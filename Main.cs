@@ -2,6 +2,7 @@
 using SimHub.Plugins;
 using System;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows.Media;
 
 namespace Bojote.DashBreeze
@@ -14,14 +15,12 @@ namespace Bojote.DashBreeze
     {
         public static class Constants
         {
-            public const string HandShakeSnd        = "DashBreeze_OK";
             public const string HandShakeRcv        = "BINGO";
-            public const string uniqueID            = "MADUROESGAY";
             public const string uniqueIDresponse    = "ACK";
-            public const string QueryStatus         = "KNOCK-KNOCK";
         }
 
         public SerialConnection SerialConnection { get; set; }
+        public SettingsControl SettingsControl { get; set; }
 
         // Declared for gameData
         public static bool SerialOK = false;
@@ -59,9 +58,27 @@ namespace Bojote.DashBreeze
             {
                 if (data.OldData != null && data.NewData != null)
                 {
-                    if (SerialOK)
+                    if (SerialOK && SerialConnection.IsConnected)
                     {
                         // this.TriggerEvent("MaxSpeed");
+
+                        // Map speed to the percentage range 0-100%
+                        double ratio = 0;
+                        if (data.NewData.MaxSpeedKmh != 0)
+                        {
+                            ratio = data.NewData.SpeedKmh / data.NewData.MaxSpeedKmh;
+                        }
+
+                        int MappedSpeedPct = (int)(ratio * 100);
+
+
+                        // Decrease the intensity of the fan. A value of 100% intensity will keep the fan working at its original RPM's
+                        double intensity = (double)Settings.FanIntensity / 100;
+                        int MappedSpeedPctAdjusted = (int)(MappedSpeedPct * intensity);
+
+                        // We can cast safely to byte as we are within range 0-100
+                        byte[] serialData = new byte[] { (byte)MappedSpeedPctAdjusted, (byte)MappedSpeedPctAdjusted };
+                        SerialConnection.SerialPort.Write(serialData, 0, serialData.Length);
                     }
                 }
             }
@@ -78,6 +95,11 @@ namespace Bojote.DashBreeze
 
             // Save settings
             this.SaveCommonSettings("DashBreeze", Settings);
+
+            SerialConnection.ForcedDisconnect();
+
+            // SerialConnection.ForcedDisconnect();
+            SimHub.Logging.Current.Info("Changed game, disconnecting serial!");
 
             SimHub.Logging.Current.Info("END -> End");
         }
@@ -106,16 +128,6 @@ namespace Bojote.DashBreeze
 
             // Load settings
             Settings = this.ReadCommonSettings<MainSettings>("DashBreeze", () => CreateDefaultSettings() );
-
-            if (SerialConnection == null)
-            {
-                SimHub.Logging.Current.Info($"Will create a new SerialConnection() object");
-                SerialConnection = new SerialConnection();
-            }
-            else
-            {
-                SimHub.Logging.Current.Info($"A SerialConnection() already existed, we'll use that one");
-            }
 
             // Declare a property available in the property list, this gets evaluated "on demand" (when shown or used in formulas)
             this.AttachDelegate("CurrentDateTime", () => DateTime.Now);
@@ -157,7 +169,7 @@ namespace Bojote.DashBreeze
                 ConnectToSerialDevice = false,
                 SelectedBaudRate = "115200",
                 FanSpeed = 10,
-                FanIntensity = 15
+                FanIntensity = 100
             };
             return settings;
         }

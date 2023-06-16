@@ -228,16 +228,15 @@ namespace Bojote.DashBreeze
             }
         }
 
-        public void ChangeDeviceStateAsync(string identifier)
+        public void ChangeDeviceStateAsync()
         {
             if (IsConnected)
             {
                 if (SerialPort == null)
                     return;
 
-                byte[] command255 = { 255 };
-                SerialPort.Write(command255, 0, 1);
-                SerialPort.WriteLine(identifier);
+                byte[] command255 = { 255, 255 };
+                SerialPort.Write(command255, 0, command255.Length);
 
                 Thread.Sleep(10);
 
