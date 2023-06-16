@@ -369,17 +369,6 @@ namespace Bojote.DashBreeze
         {
 
         }
-        private void SerialCommand(object sender)
-        {
-            // If my environment loaded already...
-            if (!isReady)
-                return;
-
-            // Not connected? don't even run...
-            if (!SerialConnection.IsConnected)
-                return;
-
-        }
 
         public async Task<bool> TryConnect(string currentSelection, int BaudRate)
         {
@@ -441,7 +430,7 @@ namespace Bojote.DashBreeze
                                 isChecked = true;
                                 int CurrentbaudRate = SerialConnection.GetBaudRate();
                                 SimHub.Logging.Current.Info($"Connected at {SelectedBaudRate} baud rate");
-                                InitServos();
+                                InitFans();
                         }
                             else {
                                 SimHub.Logging.Current.Info("But failed...");
@@ -451,7 +440,7 @@ namespace Bojote.DashBreeze
                                 ConnectCheckBox.IsChecked = false;
                                 SimHub.Logging.Current.Info("Not Connected");
                                 isChecked = false;
-                                InitServos();
+                                InitFans();
                         }
                         }
                     }
@@ -483,10 +472,10 @@ namespace Bojote.DashBreeze
             return isChecked;
         }
 
-        public void InitServos()
+        public void InitFans()
         {
-            // Initialize the Fans to 100% Duty cycle
-            byte[] serialData = new byte[] { 10, 10 };
+            // Initialize the Fans to 0% Duty cycle
+            byte[] serialData = new byte[] { 0, 0 };
 
             SerialConnection.SerialPort.Write(serialData, 0, serialData.Length);
         }

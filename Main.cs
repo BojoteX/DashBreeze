@@ -2,7 +2,6 @@
 using SimHub.Plugins;
 using System;
 using System.Reflection;
-using System.Threading.Tasks;
 using System.Windows.Media;
 
 namespace Bojote.DashBreeze
@@ -20,7 +19,6 @@ namespace Bojote.DashBreeze
         }
 
         public SerialConnection SerialConnection { get; set; }
-        public SettingsControl SettingsControl { get; set; }
 
         // Declared for gameData
         public static bool SerialOK = false;
@@ -98,7 +96,6 @@ namespace Bojote.DashBreeze
 
             SerialConnection.ForcedDisconnect();
 
-            // SerialConnection.ForcedDisconnect();
             SimHub.Logging.Current.Info("Changed game, disconnecting serial!");
 
             SimHub.Logging.Current.Info("END -> End");
@@ -145,15 +142,15 @@ namespace Bojote.DashBreeze
             this.AddEvent("MaxSpeed");
 
             // Declare an action which can be called
-            this.AddAction("IncrementFanSpeed",(a, b) =>
+            this.AddAction("IncrementFanIntensity",(a, b) =>
             {
-            Settings.FanSpeed++;
+            Settings.FanIntensity++;
             });
 
             // Declare an action which can be called
-            this.AddAction("DecrementFanSpeed", (a, b) =>
+            this.AddAction("DecrementFanIntensity", (a, b) =>
             {
-                Settings.FanSpeed--;
+                Settings.FanIntensity--;
             });
 
             SimHub.Logging.Current.Info("END -> Init");
@@ -168,8 +165,7 @@ namespace Bojote.DashBreeze
                 SelectedSerialDevice = "None",
                 ConnectToSerialDevice = false,
                 SelectedBaudRate = "115200",
-                FanSpeed = 10,
-                FanIntensity = 100
+                FanIntensity = 50
             };
             return settings;
         }
