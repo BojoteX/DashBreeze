@@ -474,8 +474,10 @@ namespace Bojote.DashBreeze
 
         public void InitFans()
         {
+            Thread.Sleep(1000);
+
             // Initialize the Fans to 0% Duty cycle
-            byte[] serialData = new byte[] { 0, 0 };
+            byte[] serialData = new byte[] { 10, 10 };
 
             SerialConnection.SerialPort.Write(serialData, 0, serialData.Length);
         }

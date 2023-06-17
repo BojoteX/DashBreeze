@@ -236,7 +236,7 @@ namespace Bojote.DashBreeze
                 byte[] command255 = { 255, 255 };
                 SerialPort.Write(command255, 0, command255.Length);
 
-                Thread.Sleep(10);
+                Thread.Sleep(100);
 
             }
             else
