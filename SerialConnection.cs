@@ -103,7 +103,7 @@ namespace Bojote.DashBreeze
             }
         }
 
-        public async Task<SerialConnection> Connect(string portName, int BaudRate = 115200, bool ResetCon = false)
+        public async Task<SerialConnection> Connect(string portName, int BaudRate = 115200, bool ResetCon = true)
         {
             if (IsConnected)
             {

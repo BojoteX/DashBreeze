@@ -34,7 +34,7 @@ namespace Bojote.DashBreeze
                             if (SC == null)
                                 return;
 
-                            await SC.Connect(portName, BaudRate, ResetCon: false);
+                            await SC.Connect(portName, BaudRate, ResetCon: true);
 
                             if (!SC.IsConnected)
                                 return;
