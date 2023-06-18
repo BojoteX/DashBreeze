@@ -87,9 +87,7 @@
                             </ToggleButton.Template>
                         </ToggleButton>
                     </StackPanel>
-                    
-                <!--
-
+                   
                     <StackPanel Margin="0,10">
                         <styles:SHButtonSecondary x:Name="ToggleButton" HorizontalAlignment="Left" Click="Button_Click">Handshake Mode</styles:SHButtonSecondary>
                     </StackPanel>
@@ -101,9 +99,7 @@
                     <StackPanel Margin="0,10">
                         <styles:SHButtonSecondary x:Name="Debugeador" HorizontalAlignment="Left" Click="Button_Click">Debug</styles:SHButtonSecondary>
                     </StackPanel>
-                
-                -->
-
+            
                 </StackPanel>
                 <!-- Right side sliders -->
                 <StackPanel Grid.Column="1" Margin="30,0,0,10">

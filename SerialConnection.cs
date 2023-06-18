@@ -77,7 +77,6 @@ namespace Bojote.DashBreeze
 
         public void LoadSerialDevices()
         {
-            Thread.Sleep(2000);
             string[] portNames = SerialPort.GetPortNames();
             foreach (string port in portNames)
             {
@@ -127,8 +126,8 @@ namespace Bojote.DashBreeze
 
             SimHub.Logging.Current.Info($"Will attempt connection use as actualBaudrate {actualBaudRate} (I received {_SelectedBaudRate} as _SelectedBaudRate and {BaudRate} as BaudRate). Important for future troubleshooting");
 
-            // Force to false
-            ResetCon = false;
+            // Force to true
+            ResetCon = true;
             SerialPort = new SerialPort(portName, actualBaudRate)
             {
                 RtsEnable = ResetCon,
@@ -176,9 +175,6 @@ namespace Bojote.DashBreeze
 
         public void ForcedDisconnect()
         {
-            if (!IsConnected)
-                return;
-
             try
             {
                 if (SerialPort == null)
@@ -186,6 +182,14 @@ namespace Bojote.DashBreeze
 
                 Main.SerialOK = false;
                 SerialPort.Close();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                SimHub.Logging.Current.Error($"Disconnect denied for: " + ex.Message);
+            }
+            catch (Exception)
+            {
+                SimHub.Logging.Current.Error($"Could not disconnect");
             }
             finally
             {
