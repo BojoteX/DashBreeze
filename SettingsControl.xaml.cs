@@ -1,9 +1,7 @@
-﻿using Microsoft.Win32.SafeHandles;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Linq;
 using System.Management;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -19,11 +17,11 @@ namespace Bojote.DashBreeze
         // Needed for internal stuff
         private readonly SemaphoreSlim semaphore = new SemaphoreSlim(1);
         private ManagementEventWatcher _watcher;
+        private string prevDevicePermanent; // Declare the shared variable
+        private bool prevDeviceStatePermanent; // Declare the shared variable
 
         // Some custom variables 
         public bool isReady = false; // Declare the shared variable
-        public string prevDevicePermanent; // Declare the shared variable
-        public bool prevDeviceStatePermanent; // Declare the shared variable
 
         public SerialConnection SerialConnection { get; set; }
 
@@ -132,6 +130,9 @@ namespace Bojote.DashBreeze
                         if (prevDevicePermanent == null)
                             prevDevicePermanent = prevSelection;
 
+                        // Allow time after disconnection to refresh the list
+                        await Task.Delay(500);
+
                         for (int i = 1; i < 6; i++) // Attempt to update the list 5 times
                         {
                             Plugin.SerialConnection.LoadSerialDevices();
@@ -147,13 +148,14 @@ namespace Bojote.DashBreeze
                             {
                                 // Interrupt all serial comunication when about to disconnect
                                 Main.SerialOK = false;
-                                await Task.Delay(100); // Delay to allow for the above variable to update
+                                await Task.Delay(500); // Delay to allow for the above variable to update
 
                                 Plugin.SerialConnection.ForcedDisconnect();
                                 // Wait for a while before the next try
                                 await Task.Delay(1000); // Delay for one second
                                 GC.Collect();
                                 GC.WaitForPendingFinalizers();
+                                await Task.Delay(500); // Delay to allow for garbage collector to do its thing
                                 SimHub.Logging.Current.Info($"Serial devices list was not refreshed for {Main.PluginName}, will try again... Attempt Number {i}, let me also force a Disconnect");
 
                                 if (i == 5) // I tried 5 times...
@@ -171,7 +173,7 @@ namespace Bojote.DashBreeze
 
                         if (currentSelection != prevSelection)
                         {
-                            SimHub.Logging.Current.Info($"InstanceDeletionEvent: Here is where we disconnect {Main.PluginName} as it disappeared from my list while being the selected option");                            
+                            SimHub.Logging.Current.Info($"InstanceDeletionEvent: Here is where we disconnect {Main.PluginName} as it disappeared from my list while being the selected option");
                             Plugin.Settings.SelectedSerialDevice = "None";
                             SerialDevicesComboBox.SelectedItem = "None";
                             ConnectCheckBox.IsChecked = false;
@@ -180,15 +182,16 @@ namespace Bojote.DashBreeze
                         {
                             SimHub.Logging.Current.Info($"Do we have to re-sconnect {Main.PluginName}?");
                             ConnectCheckBox.IsChecked = false;
+                            await Task.Delay(500); // Delay to allow for the above variable to update
                             ConnectCheckBox.IsChecked = true;
-                            await Task.Delay(100); // Delay to allow for the above variable to update
+                            await Task.Delay(500); // Delay to allow for the above variable to update
                             Main.SerialOK = true;
                         }
                         SimHub.Logging.Current.Info($"DISCONNECT: The last connected device was {prevDevicePermanent} and Connect Checkbox was set to {prevDeviceStatePermanent}");
                     });
                     break;
                 case "__InstanceCreationEvent":
-                    Dispatcher.Invoke(() =>
+                    Dispatcher.Invoke(async () =>
                     {
                         bool isChecked;
                         // Now load the devices
@@ -198,6 +201,9 @@ namespace Bojote.DashBreeze
                             isChecked = false;
 
                         SimHub.Logging.Current.Info($"InstanceCreationEvent: Here is where we re-connect {Main.PluginName}");
+
+                        // Allow time after re-connection to refresh the list
+                        await Task.Delay(500);
 
                         SerialConnection.LoadSerialDevices();
                         SerialDevicesComboBox.ItemsSource = SerialConnection.SerialDevices;
