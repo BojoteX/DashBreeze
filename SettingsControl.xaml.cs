@@ -19,13 +19,14 @@ namespace Bojote.DashBreeze
         private ManagementEventWatcher _watcher;
         private string prevDevicePermanent; // Declare the shared variable
         private bool prevDeviceStatePermanent; // Declare the shared variable
+        private bool watcherStarted = false;
 
         // Some custom variables 
         public bool isReady = false; // Declare the shared variable
 
         public SerialConnection SerialConnection { get; set; }
 
-        public Main Plugin { get; }
+        public DashBreeze Plugin { get; }
 
         public SettingsControl()
         {
@@ -37,7 +38,7 @@ namespace Bojote.DashBreeze
             SimHub.Logging.Current.Info("END -> SettingsControl1");
         }
 
-        public SettingsControl(Main plugin) : this()
+        public SettingsControl(DashBreeze plugin) : this()
         {
             SimHub.Logging.Current.Info("BEGIN -> SettingsControl2");
 
@@ -48,7 +49,7 @@ namespace Bojote.DashBreeze
             if (Plugin.SerialConnection != null)
                 SerialConnection = Plugin.SerialConnection;
 
-            // Initialize SerialConnection for Main (if none was set)
+            // Initialize SerialConnection for gTenxor (if none was set)
             if (Plugin.SerialConnection == null && SerialConnection != null)
                 Plugin.SerialConnection = SerialConnection;
 
@@ -69,25 +70,28 @@ namespace Bojote.DashBreeze
             // Bind the device speeds to the ComboBox
             BaudRateComboBox.ItemsSource = SerialConnection.BaudRates;
 
-            // This one is for cases where I need to do something specifically in the settings page
-            // Here we REMOVED the event from our XAML file to have a little more control This only for the connect checkbox and ComboBox
-            // Here we monitor changes to the devices in the ComboBox using WatchForUSBChanges() and invoking SerialConnection.LoadSerialDevices()
+            // Need to Load some of my events
+            Loaded -= SettingsControl_Loaded;
+            Loaded += SettingsControl_Loaded;
 
-            // Need to monitor certain things
-            this.Loaded += SettingsControl_Loaded;
-            this.Unloaded += SettingsControl_Unloaded;
+            // And we also need to be able to unload them
+            Unloaded -= SettingsControl_Unloaded;
+            Unloaded += SettingsControl_Unloaded;
 
-            // Load Events from SerialConnection class
-            SerialConnection.PropertyChanged += SerialConnection_PropertyChanged;
-            SerialDevicesComboBox.SelectionChanged += ComboBox_SelectionChanged;
-            BaudRateComboBox.SelectionChanged += ComboBox_SelectionChanged;
+            // We need to make sure there is only one event always active
+            SerialConnection.OnDataReceived -= HandleDataReceived;
             SerialConnection.OnDataReceived += HandleDataReceived;
 
-            // Load events from SettingsControl class
-            ConnectCheckBox.Checked += Connect_Checked;
-            ConnectCheckBox.Unchecked += Connect_Unchecked;
+            // Load Events from SerialConnection class
+            SerialConnection.PropertyChanged -= SerialConnection_PropertyChanged;
+            SerialConnection.PropertyChanged += SerialConnection_PropertyChanged;
 
-            Task.Run(() => TryConnect(null,0));
+            // Load Events from for combo box changes
+            SerialDevicesComboBox.SelectionChanged -= ComboBox_SelectionChanged;
+            SerialDevicesComboBox.SelectionChanged += ComboBox_SelectionChanged;
+
+            // Connect automatically if setting is active
+            Task.Run(() => TryConnect(null, 0));
 
             // Need to figure out a more efficient way to do this and limit it to com ports only..
             WatchForUSBChanges();
@@ -99,17 +103,22 @@ namespace Bojote.DashBreeze
 
         public void WatchForUSBChanges()
         {
-            string sqlQuery = "SELECT * FROM __InstanceOperationEvent WITHIN 2 WHERE TargetInstance ISA 'Win32_PnPEntity' AND TargetInstance.PNPClass = 'Ports'";
+            if (!watcherStarted)
+            {
+                string sqlQuery = "SELECT * FROM __InstanceOperationEvent WITHIN 2 WHERE TargetInstance ISA 'Win32_PnPEntity' AND TargetInstance.PNPClass = 'Ports'";
 
-            _watcher = new ManagementEventWatcher();
-            _watcher.EventArrived += new EventArrivedEventHandler(USBChangedEvent);
-            _watcher.Query = new WqlEventQuery(sqlQuery);
-            _watcher.Start();
+                _watcher = new ManagementEventWatcher();
+                _watcher.EventArrived += new EventArrivedEventHandler(USBChangedEvent);
+                _watcher.Query = new WqlEventQuery(sqlQuery);
+                _watcher.Start();
+
+                watcherStarted = true;
+            }
         }
 
         void USBChangedEvent(object sender, EventArrivedEventArgs e)
         {
-            SimHub.Logging.Current.Info($"BEGIN -> USBChanged for {Main.PluginName} from {sender}");
+            SimHub.Logging.Current.Info($"BEGIN -> USBChanged for {DashBreeze.PluginName} from {sender}");
 
             string eventType = e.NewEvent.ClassPath.ClassName;
             ManagementBaseObject targetInstance = (ManagementBaseObject)e.NewEvent["TargetInstance"];
@@ -147,7 +156,7 @@ namespace Bojote.DashBreeze
                             else
                             {
                                 // Interrupt all serial comunication when about to disconnect
-                                Main.SerialOK = false;
+                                DashBreeze.SerialOK = false;
                                 await Task.Delay(500); // Delay to allow for the above variable to update
 
                                 Plugin.SerialConnection.ForcedDisconnect();
@@ -156,36 +165,36 @@ namespace Bojote.DashBreeze
                                 GC.Collect();
                                 GC.WaitForPendingFinalizers();
                                 await Task.Delay(500); // Delay to allow for garbage collector to do its thing
-                                SimHub.Logging.Current.Info($"Serial devices list was not refreshed for {Main.PluginName}, will try again... Attempt Number {i}, let me also force a Disconnect");
+                                SimHub.Logging.Current.Info($"Serial devices list was not refreshed for {DashBreeze.PluginName}, will try again... Attempt Number {i}, let me also force a Disconnect");
 
                                 if (i == 5) // I tried 5 times...
                                 {
-                                    SimHub.Logging.Current.Info($"Find some extreme methods for {Main.PluginName} as nothing works!");
+                                    SimHub.Logging.Current.Info($"Find some extreme methods for {DashBreeze.PluginName} as nothing works!");
                                     Plugin.SerialConnection.LoadSerialDevices();
                                 }
                             }
                         }
 
-                        SimHub.Logging.Current.Info($"Previous selection was {prevSelection} for {Main.PluginName} (also have {prevDevicePermanent}) and auto connect is {prevDeviceStatePermanent}");
+                        SimHub.Logging.Current.Info($"Previous selection was {prevSelection} for {DashBreeze.PluginName} (also have {prevDevicePermanent}) and auto connect is {prevDeviceStatePermanent}");
 
                         SerialDevicesComboBox.ItemsSource = SerialConnection.SerialDevices;
                         string currentSelection = SerialDevicesComboBox.SelectedItem as string;
 
                         if (currentSelection != prevSelection)
                         {
-                            SimHub.Logging.Current.Info($"InstanceDeletionEvent: Here is where we disconnect {Main.PluginName} as it disappeared from my list while being the selected option");
+                            SimHub.Logging.Current.Info($"InstanceDeletionEvent: Here is where we disconnect {DashBreeze.PluginName} as it disappeared from my list while being the selected option");
                             Plugin.Settings.SelectedSerialDevice = "None";
                             SerialDevicesComboBox.SelectedItem = "None";
                             ConnectCheckBox.IsChecked = false;
                         }
                         else
                         {
-                            SimHub.Logging.Current.Info($"Do we have to re-sconnect {Main.PluginName}?");
+                            SimHub.Logging.Current.Info($"Do we have to re-sconnect {DashBreeze.PluginName}?");
                             ConnectCheckBox.IsChecked = false;
                             await Task.Delay(500); // Delay to allow for the above variable to update
                             ConnectCheckBox.IsChecked = true;
                             await Task.Delay(500); // Delay to allow for the above variable to update
-                            Main.SerialOK = true;
+                            DashBreeze.SerialOK = true;
                         }
                         SimHub.Logging.Current.Info($"DISCONNECT: The last connected device was {prevDevicePermanent} and Connect Checkbox was set to {prevDeviceStatePermanent}");
                     });
@@ -200,7 +209,7 @@ namespace Bojote.DashBreeze
                         else
                             isChecked = false;
 
-                        SimHub.Logging.Current.Info($"InstanceCreationEvent: Here is where we re-connect {Main.PluginName}");
+                        SimHub.Logging.Current.Info($"InstanceCreationEvent: Here is where we re-connect {DashBreeze.PluginName}");
 
                         // Allow time after re-connection to refresh the list
                         await Task.Delay(500);
@@ -220,7 +229,7 @@ namespace Bojote.DashBreeze
                         }
                         else
                         {
-                            SimHub.Logging.Current.Info($"InstanceCreationEvent: Here is where we disconnect {Main.PluginName}");
+                            SimHub.Logging.Current.Info($"InstanceCreationEvent: Here is where we disconnect {DashBreeze.PluginName}");
                             Plugin.Settings.SelectedSerialDevice = "None";
                             SerialDevicesComboBox.SelectedItem = "None";
                         }
@@ -233,7 +242,7 @@ namespace Bojote.DashBreeze
 
         private void SerialConnection_PropertyChanged(object sender, PropertyChangedEventArgs e)
         {
-            SimHub.Logging.Current.Info($"BEGIN -> PropertyChanged for {Main.PluginName} from {sender}");
+            SimHub.Logging.Current.Info($"BEGIN -> PropertyChanged for {DashBreeze.PluginName} from {sender}");
 
             if (e.PropertyName == nameof(SerialConnection.SerialDevices))
             {
@@ -281,14 +290,21 @@ namespace Bojote.DashBreeze
 
         private void SettingsControl_Loaded(object sender, RoutedEventArgs e)
         {
+            // Load events from SettingsControl class
+            ConnectCheckBox.Checked += Connect_Checked;
+            ConnectCheckBox.Unchecked += Connect_Unchecked;
+            BaudRateComboBox.SelectionChanged += ComboBox_SelectionChanged;
+
             SimHub.Logging.Current.Info("BEGIN -> SettingsControl_Loaded");
             if (SerialConnection != null)
             {
-                if (SerialConnection.IsConnected) { 
+                if (SerialConnection.IsConnected)
+                {
                     SimHub.Logging.Current.Info("Already connected!");
                 }
-                else { 
-                    AutoDetectDevice(Plugin.Settings); 
+                else
+                {
+                    AutoDetectDevice(Plugin.Settings);
                 }
             }
             SimHub.Logging.Current.Info("END -> SettingsControl_Loaded");
@@ -296,11 +312,12 @@ namespace Bojote.DashBreeze
         private void SettingsControl_Unloaded(object sender, RoutedEventArgs e)
         {
             SimHub.Logging.Current.Info("BEGIN -> SettingsControl_UnLoaded");
-            if (SerialConnection != null)
-            {
-                // Plugin.Settings.ConnectToSerialDevice = false;
 
-            }
+            // UnLoad events from SettingsControl class
+            ConnectCheckBox.Checked -= Connect_Checked;
+            ConnectCheckBox.Unchecked -= Connect_Unchecked;
+            BaudRateComboBox.SelectionChanged -= ComboBox_SelectionChanged;
+
             SimHub.Logging.Current.Info("END -> SettingsControl_UnLoaded");
         }
 
@@ -350,7 +367,7 @@ namespace Bojote.DashBreeze
                 // Plugin.SerialConnection.Dispose();
 
                 // This is just to send the string to change the device state
-                string _data = Main.PrintObjectProperties(Plugin.Settings);
+                string _data = DashBreeze.PrintObjectProperties(Plugin.Settings);
                 OutputMsg(_data);
             }
 
@@ -560,11 +577,11 @@ namespace Bojote.DashBreeze
             SimHub.Logging.Current.Info($"Received: {data.Trim()}");
 
             // Process the received data, e.g., check if it meets your criteria
-            if (data.Trim() == Main.Constants.uniqueIDresponse)
+            if (data.Trim() == DashBreeze.Constants.uniqueIDresponse)
             {
                 SimHub.Logging.Current.Info($"Received ACK! We are ready to send via serial");
                 // Set SerialOK 
-                Main.SerialOK = true;
+                DashBreeze.SerialOK = true;
             }
             Application.Current.Dispatcher.Invoke(() => { OutputMsg(data); });
         }

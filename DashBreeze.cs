@@ -10,7 +10,7 @@ namespace Bojote.DashBreeze
     [PluginAuthor("Bojote")]
     [PluginName("DashBreeze")]
 
-    public class Main : IPlugin, IDataPlugin, IWPFSettingsV2
+    public class DashBreeze : IPlugin, IDataPlugin, IWPFSettingsV2
     {
         public static class Constants
         {
@@ -190,7 +190,7 @@ namespace Bojote.DashBreeze
         }
         public static string GetPluginName()
         {
-            Type mainType = typeof(Main);
+            Type mainType = typeof(DashBreeze);
             PluginNameAttribute pluginNameAttribute = mainType.GetCustomAttribute<PluginNameAttribute>();
 
             if (pluginNameAttribute != null)

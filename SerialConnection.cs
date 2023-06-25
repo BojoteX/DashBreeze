@@ -109,7 +109,7 @@ namespace Bojote.DashBreeze
             {
                 await Task.Delay(2000);
                 SimHub.Logging.Current.Info($"Was already connected! still waited 2 seconds to allow Device to respond to requests");
-                Main.SerialOK = true;
+                DashBreeze.SerialOK = true;
                 return this;
             }
 
@@ -152,7 +152,7 @@ namespace Bojote.DashBreeze
                 {
                     await Task.Delay(2000);
                     SimHub.Logging.Current.Info($"Connected! and waited 2 seconds to allow Device to respond to requests");
-                    Main.SerialOK = true;
+                    DashBreeze.SerialOK = true;
                     return this;
                 }
                 else
@@ -180,7 +180,7 @@ namespace Bojote.DashBreeze
                 if (SerialPort == null)
                     return;
 
-                Main.SerialOK = false;
+                DashBreeze.SerialOK = false;
                 SerialPort.Close();
             }
             catch (UnauthorizedAccessException ex)
@@ -197,7 +197,7 @@ namespace Bojote.DashBreeze
                 {
                     SerialPort.Dispose();
                     SerialPort = null;
-                    Main.SerialOK = false;
+                    DashBreeze.SerialOK = false;
                 }
             }
         }
@@ -219,7 +219,7 @@ namespace Bojote.DashBreeze
                 if (SerialPort == null)
                     return;
 
-                Main.SerialOK = false;
+                DashBreeze.SerialOK = false;
                 SerialPort.Close();
             }
             finally
@@ -228,7 +228,7 @@ namespace Bojote.DashBreeze
                 {
                     SerialPort.Dispose();
                     SerialPort = null;
-                    Main.SerialOK = false;
+                    DashBreeze.SerialOK = false;
                 }
             }
         }

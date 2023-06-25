@@ -41,7 +41,7 @@ namespace Bojote.DashBreeze
 
                             SimHub.Logging.Current.Info($"Opened {portName}");
 
-                            string HandShakeString = Main.Constants.HandShakeRcv;
+                            string HandShakeString = DashBreeze.Constants.HandShakeRcv;
 
                             byte[] command255 = { 255, 254 };
                             SC.SerialPort.Write(command255, 0, command255.Length);
