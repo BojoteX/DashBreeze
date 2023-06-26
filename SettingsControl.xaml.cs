@@ -19,10 +19,12 @@ namespace Bojote.DashBreeze
         private ManagementEventWatcher _watcher;
         private string prevDevicePermanent; // Declare the shared variable
         private bool prevDeviceStatePermanent; // Declare the shared variable
-        private bool watcherStarted = false;
 
         // Some custom variables 
         public bool isReady = false; // Declare the shared variable
+
+        // Static variables
+        private static bool watcherStarted = false;
 
         public SerialConnection SerialConnection { get; set; }
 
@@ -103,6 +105,7 @@ namespace Bojote.DashBreeze
 
         public void WatchForUSBChanges()
         {
+            SimHub.Logging.Current.Info($"Will try to watch for USB events...");
             if (!watcherStarted)
             {
                 string sqlQuery = "SELECT * FROM __InstanceOperationEvent WITHIN 2 WHERE TargetInstance ISA 'Win32_PnPEntity' AND TargetInstance.PNPClass = 'Ports'";
@@ -113,6 +116,11 @@ namespace Bojote.DashBreeze
                 _watcher.Start();
 
                 watcherStarted = true;
+                SimHub.Logging.Current.Info($"Confirmed! watching for USB events");
+            }
+            else
+            {
+                SimHub.Logging.Current.Info($"Already doing it! there was no need to load");
             }
         }
 
