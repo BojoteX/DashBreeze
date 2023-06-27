@@ -17,14 +17,14 @@ namespace Bojote.DashBreeze
         // Needed for internal stuff
         private readonly SemaphoreSlim semaphore = new SemaphoreSlim(1);
         private ManagementEventWatcher _watcher;
-        private string prevDevicePermanent; // Declare the shared variable
-        private bool prevDeviceStatePermanent; // Declare the shared variable
 
         // Some custom variables 
         public bool isReady = false; // Declare the shared variable
 
         // Static variables
         private static bool watcherStarted = false;
+        private static string prevDevicePermanent; // Declare the shared variable
+        private static bool prevDeviceStatePermanent; // Declare the shared variable
 
         public SerialConnection SerialConnection { get; set; }
 
