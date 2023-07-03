@@ -10,7 +10,7 @@ DashBreeze is a SimHub plugin designed to control fans based on your simulator's
 
 ## Installation
 
-To install the DashBreeze plugin, download the DLL file from the repository and place it in the same directory where SimHub is installed.
+To install the DashBreeze plugin, download the DLL file from the repository and place it in the same directory where SimHub is installed. If you don't have the DashBreeze control unit you can use an Arduino Leonardo and upload the custom sketch included in the Hardware directory.
 
 ## Usage
 
