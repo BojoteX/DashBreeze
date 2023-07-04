@@ -1,6 +1,6 @@
 # DashBreeze
 
-DashBreeze is a SimHub plugin designed to control fans based on your simulator's speed telemetry data, simulating the feeling of wind rushing against your face.
+DashBreeze is a SimHub plugin designed to control fans based on your simulator's speed telemetry data, simulating the feeling of wind rushing against your face. This is the software component only, you still require the DashBreeze control unit + fans which you can purchase online. If you do NOT want to use the Dashbreeze control unit you can still use this plugin with your own Arduino device using the sketch provided in the Hardware directory. 
 
 ## Features
 
