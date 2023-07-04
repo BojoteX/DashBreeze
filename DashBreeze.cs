@@ -2,6 +2,7 @@
 using SimHub.Plugins;
 using System;
 using System.Reflection;
+using System.Threading;
 using System.Windows.Media;
 
 namespace Bojote.DashBreeze
@@ -135,9 +136,19 @@ namespace Bojote.DashBreeze
             this.AddAction("ToggleLiveFan", (a, b) =>
             {
                 if (SerialOK)
+                {
                     SerialOK = false;
+                    Thread.Sleep(100);
+                    if (SerialConnection.IsConnected)
+                    {
+                        byte[] serialData = new byte[] { 10, 10 };
+                        SerialConnection.SerialPort.Write(serialData, 0, serialData.Length);
+                    }
+                }
                 else
+                {
                     SerialOK = true;
+                }
             });
 
             // Declare an event
