@@ -81,6 +81,15 @@ namespace Bojote.DashBreeze
                         byte[] serialData = new byte[] { (byte)MappedSpeedPctAdjusted, (byte)MappedSpeedPctAdjusted };
                         SerialConnection.SerialPort.Write(serialData, 0, serialData.Length);
                     }
+                    else
+                    {
+                        if (SerialConnection.IsConnected)
+                        {
+                            // Set fans to idle speed
+                            byte[] serialData = new byte[] { 10,10 };
+                            SerialConnection.SerialPort.Write(serialData, 0, serialData.Length);
+                        }
+                    }
                 }
             }
         }
@@ -138,12 +147,7 @@ namespace Bojote.DashBreeze
                 if (SerialOK)
                 {
                     SerialOK = false;
-                    Thread.Sleep(100);
-                    if (SerialConnection.IsConnected)
-                    {
-                        byte[] serialData = new byte[] { 10, 10 };
-                        SerialConnection.SerialPort.Write(serialData, 0, serialData.Length);
-                    }
+                    SimHub.Logging.Current.Info($"Fan Reset");
                 }
                 else
                 {

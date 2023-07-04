@@ -371,6 +371,7 @@ namespace Bojote.DashBreeze
                 AutoDetectDevice(Plugin.Settings);
             }
 
+            /*
             else if (sender == ToggleButton)
             {
                 // This is just to send the string to change the device state
@@ -406,6 +407,8 @@ namespace Bojote.DashBreeze
                 string _data = DashBreeze.PrintObjectProperties(Plugin.Settings);
                 OutputMsg(_data);
             }
+            */
+
 
         }
 
