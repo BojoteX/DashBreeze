@@ -6,5 +6,6 @@
         public string SelectedBaudRate { get; set; }
         public bool ConnectToSerialDevice { get; set; }
         public int FanIntensity { get; set; }
+        public bool USBCheck { get; set; }
     }
 }

@@ -2,7 +2,6 @@
 using SimHub.Plugins;
 using System;
 using System.Reflection;
-using System.Threading;
 using System.Windows.Media;
 
 namespace Bojote.DashBreeze
@@ -185,7 +184,8 @@ namespace Bojote.DashBreeze
                 SelectedSerialDevice = "None",
                 ConnectToSerialDevice = false,
                 SelectedBaudRate = "115200",
-                FanIntensity = 50
+                FanIntensity = 50,
+                USBCheck = true
             };
             return settings;
         }
